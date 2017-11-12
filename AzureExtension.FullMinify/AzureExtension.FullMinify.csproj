@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DouglasCrockford.JsMin" Version="1.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <PackageReference Include="ZetaProducerHtmlCompressor" Version="1.0.2" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using AzureExtension.FullMinify.Minify;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace AzureExtension.FullMinify
 {
@@ -16,10 +14,10 @@ namespace AzureExtension.FullMinify
         public static void Main(string[] args)
         {
             var extensions = new List<string>();
-            var path;
+            string path;
             
             ConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.AddEnvironmentVariables().AddJsonFile("appsettings.json");
+            builder.AddEnvironmentVariables().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json");
             var configuration = builder.Build();
 
             if (!string.IsNullOrEmpty(configuration["minify.extensions"]))

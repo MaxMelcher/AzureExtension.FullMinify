@@ -10,6 +10,7 @@ namespace AzureExtension.FullMinify.Minify
         void MinifyCSS(string filepath);
         void MinifyHtml(string filepath);
         void MinifyJs(string filepath);
+        void MinifyImage(string filepath);
         void Watch(Task task);
         void Minify(string path, DateTime date);
     }
