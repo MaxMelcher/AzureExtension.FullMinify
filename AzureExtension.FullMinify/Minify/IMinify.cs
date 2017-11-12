@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace AzureExtension.FullMinify.Minify
 {
-    public interface IMinify
+    public interface IMinifier
     {
         void MinifyCSS(string filepath);
         void MinifyHtml(string filepath);
         void MinifyJs(string filepath);
-        void Watch();
-        void Minify();
+        void Watch(Task task);
+        void Minify(string path, DateTime date);
     }
 }
