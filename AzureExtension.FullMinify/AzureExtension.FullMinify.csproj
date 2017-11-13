@@ -2,7 +2,30 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeBuildOutput>true</IncludeBuildOutput>
+    <Version>0.0.1</Version>
+    <Authors>MaxMelcher</Authors>
+    <Company />
+    <Product />
+    <Description>This Azure site extension minifies html, css, js and potentially (not yet!) images.</Description>
+    <PackageLicenseUrl>https://github.com/MaxMelcher/AzureExtension.FullMinify/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/MaxMelcher/AzureExtension.FullMinify</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/MaxMelcher/AzureExtension.FullMinify/master/AzureExtension.FullMinify50x50.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/MaxMelcher/AzureExtension.FullMinify</RepositoryUrl>
+    <RepositoryType></RepositoryType>
+    <PackageTags>AzureSiteExtension minification</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="applicationHost.xdt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="applicationHost.xdt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="DouglasCrockford.JsMin" Version="1.1.3" />
@@ -13,5 +36,5 @@
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
-
+  
 </Project>

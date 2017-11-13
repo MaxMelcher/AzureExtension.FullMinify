@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AzureExtension.FullMinify.Log;
+using AzureJobs.Common;
 using DouglasCrockford.JsMin;
 using ZetaProducerHtmlCompressor;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Linq;
 
 namespace AzureExtension.FullMinify.Minify
 {
@@ -12,11 +17,14 @@ namespace AzureExtension.FullMinify.Minify
     {
         private readonly List<string> _extensions;
         private readonly string _path;
+        private readonly Logger _logger;
+        private Dictionary<string, byte[]> _hash = new Dictionary<string, byte[]>();
 
-        public Minifier(List<string> extensions, string path)
+        public Minifier(List<string> extensions, string path, Logger logger)
         {
             _extensions = extensions;
             _path = path;
+            _logger = logger;
         }
 
         public void MinifyCSS(string filepath)
@@ -79,7 +87,7 @@ namespace AzureExtension.FullMinify.Minify
             {
                 FileSystemWatcher w = new FileSystemWatcher(_path)
                 {
-                    Filter = filter,
+                    Filter = "*" + filter,
                     IncludeSubdirectories = true,
                     NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.CreationTime |
                                    NotifyFilters.FileName
@@ -90,8 +98,31 @@ namespace AzureExtension.FullMinify.Minify
             }
         }
 
+        public static byte[] ReadFully(Stream input)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                input.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
+
         public void Minify(string path, DateTime date)
         {
+            if (_hash.ContainsKey(path))
+            {
+                var hash = _hash[path];
+
+                byte[] content;
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    content = ReadFully(fs);
+                }
+                var newhash = MD5.Create().ComputeHash(content);
+         
+                if (hash.SequenceEqual(newhash)) return;
+            }
+
             //todo handle images
             //todo figure out what to do with the date
             if (path.EndsWith(".html", StringComparison.InvariantCultureIgnoreCase))
@@ -106,6 +137,19 @@ namespace AzureExtension.FullMinify.Minify
             {
                 MinifyJs(path);
             }
+
+
+            _logger.Write(new LogItem
+            {
+                FileName = path,
+                OriginalSizeBytes = 0,
+                NewSizeBytes = 0
+            });
+
+            var bytes = File.ReadAllBytes(path);
+            var hashafter = MD5.Create().ComputeHash(bytes);
+
+            _hash[path] = hashafter;
         }
 
         public void FullMinify()
