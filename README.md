@@ -25,6 +25,16 @@ This project was greatly inspired by the existing site extension [Azure Image Op
 
 > JSMin.NET is a .NET port of the [Douglas Crockford's JSMin](http://github.com/douglascrockford/JSMin).
 
+## Image Minifier
+
+The image minifier is based on a couple of tools that Mads Kristensen picked:
+
+- gifsicle.exe to minify gifs
+- jpegtran.exe to minify jpgs
+- zopflipng.exe to minify pngs
+
+> Currently the images are lossy compressed to get the best results. A configuration flag will follow.
+
 ## Setup
 
 **tbd**
