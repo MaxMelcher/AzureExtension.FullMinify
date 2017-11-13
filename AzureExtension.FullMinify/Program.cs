@@ -49,8 +49,8 @@ namespace AzureExtension.FullMinify
                 logfolder = @"D:\home\site\wwwroot\app_data\";
             }
             
-            Logger logger = new Logger(logfolder);
 
+            Logger logger = new Logger(logfolder);
             Minifier minifier = new Minifier(extensions, path, logger);
             Task.Run(() => minifier.FullMinify()).ContinueWith(minifier.Watch);
 

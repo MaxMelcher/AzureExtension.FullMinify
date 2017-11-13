@@ -158,7 +158,14 @@ namespace AzureExtension.FullMinify.Minify
             {
                 foreach (string file in Directory.EnumerateFiles(_path, string.Concat("*", filter), SearchOption.AllDirectories))
                 {
-                    Minify(file, DateTime.MinValue);
+                    try
+                    {
+                        Minify(file, DateTime.MinValue);
+                    }
+                    catch (Exception ex)
+                    {
+                        
+                    }
                 }
             }
         }
