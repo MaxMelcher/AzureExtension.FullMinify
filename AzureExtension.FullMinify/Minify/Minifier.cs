@@ -17,6 +17,8 @@ namespace AzureExtension.FullMinify.Minify
         private readonly List<string> _extensions;
         private readonly string _path;
         private readonly Logger _logger;
+
+        //todo persis the hash to disk otherwise the job will be started once a day
         private Dictionary<string, byte[]> _hash = new Dictionary<string, byte[]>();
 
         public Minifier(List<string> extensions, string path, Logger logger)
