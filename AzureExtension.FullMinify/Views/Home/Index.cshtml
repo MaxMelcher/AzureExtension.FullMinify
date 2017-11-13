@@ -1,4 +1,6 @@
-﻿@using AzureExtension.FullMinify.Controllers
+﻿@using System.IO
+@using AzureExtension.FullMinify.Controllers
+@using AzureExtension.FullMinify.Helper
 @model List<AzureExtension.FullMinify.Controllers.Result>
 @{
     ViewData["Title"] = "Home Page";
@@ -6,28 +8,31 @@
 
 <div>
     <h2>AzureExtension.FullMinify</h2>
-    
+
+    <div>Files: @Model.Count</div>
+    <div>Savings: @Helper.ReturnSize(Model.Select(x => x.Saving).Sum(), string.Empty)</div>
+
     <table class="table table-bordered table-condensed table-hover">
         <thead>
-        <tr>
-            <th>File</th>
-            <th>Before</th>
-            <th>After</th>
-            <th>Safings</th>
-            <th>Processed</th>
-        </tr>
+            <tr>
+                <th>File</th>
+                <th>Before</th>
+                <th>After</th>
+                <th>Savings</th>
+                <th>Processed</th>
+            </tr>
         </thead>
         <tbody>
-    @foreach (var result in Model)
-    {
-        <tr>
-            <td>@result.FileName</td>
-            <td>@result.Original</td>
-            <td>@result.Optimized</td>
-            <td>@result.Saving</td>
-            <td>@result.Date</td>
-        </tr>
-    }
+            @foreach (var result in Model)
+            {
+                <tr>
+                    <td>@result.FileName</td>
+                    <td>@result.Original</td>
+                    <td>@result.Optimized</td>
+                    <td>@result.Saving</td>
+                    <td>@result.Date</td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>

@@ -8,7 +8,6 @@ using AzureJobs.Common;
 using DouglasCrockford.JsMin;
 using ZetaProducerHtmlCompressor;
 using System.Security.Cryptography;
-using System.Threading;
 using System.Linq;
 
 namespace AzureExtension.FullMinify.Minify
@@ -78,7 +77,11 @@ namespace AzureExtension.FullMinify.Minify
 
         public void MinifyImage(string filepath)
         {
-            throw new NotImplementedException();
+            if (filepath.EndsWith(".png"))
+            {
+                Compressor compressor = new Compressor();
+                compressor.CompressFile(filepath, true);
+            }
         }
 
         public void Watch(Task prevTask)
@@ -109,21 +112,25 @@ namespace AzureExtension.FullMinify.Minify
 
         public void Minify(string path, DateTime date)
         {
+            long before = 0;
+            long after = 0;
+
+            byte[] content;
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                content = ReadFully(fs);
+                before = content.LongLength;
+            }
+
             if (_hash.ContainsKey(path))
             {
                 var hash = _hash[path];
-
-                byte[] content;
-                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    content = ReadFully(fs);
-                }
                 var newhash = MD5.Create().ComputeHash(content);
-         
+
                 if (hash.SequenceEqual(newhash)) return;
             }
 
-            //todo handle images
+            //todo handle images jpg gif
             //todo figure out what to do with the date
             if (path.EndsWith(".html", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -137,16 +144,36 @@ namespace AzureExtension.FullMinify.Minify
             {
                 MinifyJs(path);
             }
+            else if (path.EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
+            {
+                MinifyImage(path);
+            }
+            else if (path.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase))
+            {
+                MinifyImage(path);
+            }
+            else if (path.EndsWith(".jpeg", StringComparison.InvariantCultureIgnoreCase))
+            {
+                MinifyImage(path);
+            }
+            else if (path.EndsWith(".gif", StringComparison.InvariantCultureIgnoreCase))
+            {
+                MinifyImage(path);
+            }
+
+
+
+            var bytes = File.ReadAllBytes(path);
+            after = bytes.LongLength;
 
 
             _logger.Write(new LogItem
             {
                 FileName = path,
-                OriginalSizeBytes = 0,
-                NewSizeBytes = 0
+                OriginalSizeBytes = before,
+                NewSizeBytes = after
             });
 
-            var bytes = File.ReadAllBytes(path);
             var hashafter = MD5.Create().ComputeHash(bytes);
 
             _hash[path] = hashafter;
@@ -164,7 +191,7 @@ namespace AzureExtension.FullMinify.Minify
                     }
                     catch (Exception ex)
                     {
-                        
+                        System.Diagnostics.Trace.WriteLine($"Exception: {ex}");
                     }
                 }
             }
@@ -172,3 +199,5 @@ namespace AzureExtension.FullMinify.Minify
 
     }
 }
+
+    

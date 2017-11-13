@@ -1,6 +1,6 @@
 @echo off
 
-dotnet build -c "Release"
-dotnet publish -c "Release"
+dotnet build -c "Debug"
+dotnet publish -c "Debug"
 nuget pack AzureExtension.FullMinify.nuspec
 

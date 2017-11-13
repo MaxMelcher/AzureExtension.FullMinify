@@ -1,0 +1,22 @@
+﻿@model System.Collections.Generic.List<string>
+
+
+<h2>Log</h2>
+
+
+<table class="table table-bordered table-hover">
+
+    <thead>
+        <tr>
+            <th>Text</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var text in Model)
+        {
+            <tr><td>@text</td></tr>
+        }
+    </tbody>
+
+</table>

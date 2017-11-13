@@ -12,53 +12,29 @@ namespace AzureExtension.FullMinify
 {
     public class Program
     {
+        private static IConfigurationRoot configuration;
+
         public static void Main(string[] args)
         {
-            var extensions = new List<string>();
-            string path;
-
-            ConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.AddEnvironmentVariables().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json");
-            var configuration = builder.Build();
-
-            if (!string.IsNullOrEmpty(configuration["minify.extensions"]))
-            {
-                extensions.AddRange(configuration["minify.extensions"].Split(";", StringSplitOptions.RemoveEmptyEntries));
-            }
-            else
-            {
-                extensions.AddRange(new[] { ".css", ".html", ".js" });
-            }
-
-            if (!string.IsNullOrEmpty(configuration["minify.path"]))
-            {
-                path = configuration["minify.path"];
-            }
-            else
-            {
-                path = @"D:\home\site\wwwroot\";
-            }
-
-            string logfolder;
-            if (!string.IsNullOrEmpty(configuration["minify.logpath"]))
-            {
-                logfolder = configuration["minify.logpath"];
-            }
-            else
-            {
-                logfolder = @"D:\home\site\wwwroot\app_data\";
-            }
-            
-
-            Logger logger = new Logger(logfolder);
-            Minifier minifier = new Minifier(extensions, path, logger);
-            Task.Run(() => minifier.FullMinify()).ContinueWith(minifier.Watch);
-
             BuildWebHost(args).Run();
+            Console.WriteLine("bye");
         }
+
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+               
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    var env = hostingContext.HostingEnvironment;
+           
+                    config.AddEnvironmentVariables()
+                        .SetBasePath(Directory.GetCurrentDirectory())
+                        .AddJsonFile("appsettings.json")
+                        .AddJsonFile($"appsettings.{env.EnvironmentName}.json");
+
+                    configuration = config.Build();
+                })
                 .UseStartup<Startup>()
                 .Build();
     }

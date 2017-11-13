@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureExtension.FullMinify.Minify;
+using AzureJobs.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -45,6 +47,59 @@ namespace AzureExtension.FullMinify
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            app.UseMinifier(Configuration);
+        }
+    }
+
+    public static class RegisterMinification
+    {
+        public static void UseMinifier(this IApplicationBuilder app, IConfiguration configuration)
+        {
+            try
+            {
+                var extensions = new List<string>();
+                string path;
+                
+                if (!string.IsNullOrEmpty(configuration["minify.extensions"]))
+                {
+                    extensions.AddRange(configuration["minify.extensions"].Split(";", StringSplitOptions.RemoveEmptyEntries));
+                }
+                else
+                {
+                    extensions.AddRange(new[] { ".css", ".html", ".js" });
+                }
+
+                if (!string.IsNullOrEmpty(configuration["minify.path"]))
+                {
+                    path = configuration["minify.path"];
+                }
+                else
+                {
+                    path = @"D:\home\site\wwwroot\";
+                }
+
+                string logfolder;
+                if (!string.IsNullOrEmpty(configuration["minify.logpath"]))
+                {
+                    logfolder = configuration["minify.logpath"];
+                }
+                else
+                {
+                    logfolder = @"D:\home\site\wwwroot\";
+                }
+
+                System.Diagnostics.Trace.WriteLine($"minify.path: {path}");
+                System.Diagnostics.Trace.WriteLine($"minify.extensions: {extensions}");
+                System.Diagnostics.Trace.WriteLine($"minify.logpath: {logfolder}");
+                Logger logger = new Logger(logfolder);
+                Minifier minifier = new Minifier(extensions, path, logger);
+                Task.Run(() => minifier.FullMinify()).ContinueWith(minifier.Watch);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError($"Exception: {ex}");
+            }
         }
     }
 }

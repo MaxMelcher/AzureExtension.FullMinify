@@ -3,13 +3,13 @@
   <metadata>
     <id>AzureExtension.FullMinify</id>
     <title>Azure Extension FullMinify</title>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <authors>maxmelcher</authors>
     <licenseUrl>https://github.com/MaxMelcher/AzureExtension.FullMinify/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/MaxMelcher/AzureExtension.FullMinify</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>This Azure site extension minifies html, css, js and potentially (not yet!) images.</description>
-    <iconUrl>https://raw.githubusercontent.com/MaxMelcher/AzureExtension.FullMinify/master/AzureExtension.FullMinify50x50.png</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/MaxMelcher/AzureExtension.FullMinify/master/AzureExtension.FullMinify/AzureExtension.FullMinify50x50.png</iconUrl>
     <tags>AzureSiteExtension minification</tags>
     <packageTypes>
       <packageType name="AzureSiteExtension" />

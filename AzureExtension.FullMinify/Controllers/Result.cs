@@ -10,7 +10,7 @@ namespace AzureExtension.FullMinify.Controllers
         public int Original { get; set; }
         public int Optimized { get; set; }
 
-        public int Saving
+        public long Saving
         {
             get { return Original - Optimized; }
         }

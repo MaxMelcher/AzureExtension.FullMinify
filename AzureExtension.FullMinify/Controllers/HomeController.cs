@@ -5,8 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using AzureExtension.FullMinify.Minify;
 using Microsoft.AspNetCore.Mvc;
 using AzureExtension.FullMinify.Models;
+using AzureJobs.Common;
 using Microsoft.Extensions.Configuration;
 
 namespace AzureExtension.FullMinify.Controllers
@@ -32,28 +34,83 @@ namespace AzureExtension.FullMinify.Controllers
         public IActionResult Index()
         {
             List<Result> results = new List<Result>();
+            var filepath = Path.Combine(_logfolder, "AzureExtension.FullMinify.dll.csv");
 
-
-
-            using (FileStream fs = new FileStream(Path.Combine(_logfolder, "AzureExtension.FullMinify.dll.csv"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (StreamReader sr = new StreamReader(fs))
+            try
             {
-
-                while (!sr.EndOfStream)
+                using (FileStream fs = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (StreamReader sr = new StreamReader(fs))
                 {
-                    string line = sr.ReadLine();
-                    string[] args = line.Split(',');
-                    var result = CreateResult(args);
 
-                    if (result != null)
+                    while (!sr.EndOfStream)
                     {
-                        results.Add(result);
+                        string line = sr.ReadLine();
+                        string[] args = line.Split(',');
+                        var result = CreateResult(args);
+
+                        if (result != null)
+                        {
+                            results.Add(result);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"Exception: {ex}");
             }
 
             return View(results);
         }
+
+        public IActionResult Log()
+        {
+            var logs = new List<string>();
+
+            string logfolder;
+            if (!string.IsNullOrEmpty(_configuration["minify.logpath"]))
+            {
+                logfolder = _configuration["minify.logpath"];
+            }
+            else
+            {
+                logfolder = @"D:\home\site\wwwroot\";
+            }
+
+            List<string> extensions = new List<string>();
+            if (!string.IsNullOrEmpty(_configuration["minify.extensions"]))
+            {
+                extensions.AddRange(_configuration["minify.extensions"].Split(";", StringSplitOptions.RemoveEmptyEntries));
+            }
+            else
+            {
+                extensions.AddRange(new[] { ".css", ".html", ".js" });
+            }
+
+            string path;
+            if (!string.IsNullOrEmpty(_configuration["minify.path"]))
+            {
+                path = _configuration["minify.path"];
+            }
+            else
+            {
+                path = path = @"D:\home\site\wwwroot\";
+            }
+
+            try
+            {
+                Logger logger = new Logger(logfolder);
+                Minifier minifier = new Minifier(extensions, path, logger);
+                Task.Run(() => minifier.FullMinify());
+            }
+            catch (Exception ex)
+            {
+                logs.Add(ex.ToString());
+            }
+
+            return View(logs);
+        }
+
 
         private Result CreateResult(string[] args)
         {
