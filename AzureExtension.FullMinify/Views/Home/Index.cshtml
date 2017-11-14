@@ -13,11 +13,13 @@
     
     @{
         var savingsTotal = (1-((double)Model.Sum(x => x.Optimized) / (double)Model.Sum(x => x.Original))) * 100;
-        var avgSaving = Model.Average(x => x.Saving);
+        var avgSaving = Model.Any() ? Model.Average(x => x.Saving) : 0;
+        var maxSaving = Model.Any() ? Model.OrderByDescending(x => x.Saving).First().Saving: 0;
     }
     
     <div>Total Reduction: @Helper.ReturnSize(Model.Select(x => x.Saving).Sum(), string.Empty)   (@string.Format("{0:0.00}",savingsTotal)%) </div>
     <div>AVG Saving: @Helper.ReturnSize(avgSaving, string.Empty)</div>
+    <div>MAX Saving: @Helper.ReturnSize(maxSaving, string.Empty)</div>
     
     <p style="margin:15px 0">
         The following list contains all the assets that have been minified:

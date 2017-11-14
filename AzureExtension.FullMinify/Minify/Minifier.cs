@@ -98,7 +98,8 @@ namespace AzureExtension.FullMinify.Minify
                     Filter = "*" + filter,
                     IncludeSubdirectories = true,
                     NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.CreationTime |
-                                   NotifyFilters.FileName
+                                   NotifyFilters.FileName,
+                    InternalBufferSize = 64000
                 };
                 w.Changed += (s, e) => Minify(e.FullPath, DateTime.Now);
                 w.Renamed += (s, e) => Minify(e.FullPath, DateTime.Now);
