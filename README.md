@@ -1,8 +1,8 @@
 # Azure Site Extension: FullMinifier
 
-This site extension minifies html, css, js and potentially (**not yet!**) images.
+This site extension minifies html, css, js and images.
 
-On startup of the webapp, the default directory (**D:\home\site\wwwroot\\**) is scanned for **.js**, **.html**, **.css** files. The files are then compressed and replaced.
+On startup of the webapp, the default directory (**D:\home\site\wwwroot\\**) is scanned for **.js**, **.html**, **.css**,**.jpeg**,**.png** and **.gif** files. The files are then compressed and replaced.
 If a file is changed during runtime, they will be reprocessed immediately.
 
 This project was greatly inspired by the existing site extension [Azure Image Optimizer](https://www.siteextensions.net/packages/AzureImageOptimizer/) by [Sayed-Ibrahim-Hashimi](https://twitter.com/sayedihashimi) and [Mads Kristensen](https://twitter.com/mkristensen) and is based on the following libaries:
@@ -37,7 +37,10 @@ The image minifier is based on a couple of tools that Mads Kristensen picked:
 
 ## Setup
 
-**tbd**
+Install this extension in the kudu site: https://<YourAppSiteName>.scm.azurewebsites.net/SiteExtensions/#gallery (replace <YourAppSiteName> with the name of your site!)
+Search for AzureExtension.FullMinifier
+Install it
+Then open the site https://<YourAppSiteName>.scm.azurewebsites.net/SiteExtensions/AzureExtension.FullMinifier
 
 ## Configuration
 

@@ -25,7 +25,7 @@ namespace AzureExtension.FullMinify.Minify
                 WorkingDirectory = _cwd,
                 Arguments = GetArguments(fileName, fileName, lossy),
                 UseShellExecute = false,
-                CreateNoWindow = false,
+                CreateNoWindow = true,
             };
 
             var stopwatch = Stopwatch.StartNew();

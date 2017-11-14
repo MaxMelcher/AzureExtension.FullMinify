@@ -4,28 +4,31 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AzureExtension.FullMinify.Log;
-using AzureJobs.Common;
 using DouglasCrockford.JsMin;
 using ZetaProducerHtmlCompressor;
 using System.Security.Cryptography;
 using System.Linq;
+using System.Threading;
+using AzureExtension.FullMinify.Helper;
 
 namespace AzureExtension.FullMinify.Minify
 {
     public class Minifier : IMinifier
     {
+        static readonly SemaphoreSlim SemaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly List<string> _extensions;
         private readonly string _path;
         private readonly Logger _logger;
 
         //todo persis the hash to disk otherwise the job will be started once a day
-        private Dictionary<string, byte[]> _hash = new Dictionary<string, byte[]>();
+        private FileHashStore _fileHashStore;
 
-        public Minifier(List<string> extensions, string path, Logger logger)
+        public Minifier(List<string> extensions, string path, string logfolder)
         {
             _extensions = extensions;
             _path = path;
-            _logger = logger;
+            _logger = new Logger(logfolder);
+            _fileHashStore = new FileHashStore(logfolder);
         }
 
         public void MinifyCSS(string filepath)
@@ -114,92 +117,90 @@ namespace AzureExtension.FullMinify.Minify
 
         public void Minify(string path, DateTime date)
         {
-            long before = 0;
-            long after = 0;
-
-            byte[] content;
-            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            try
             {
-                content = ReadFully(fs);
-                before = content.LongLength;
+                //if not changed - do nothing
+                if (!_fileHashStore.HasChangedOrIsNew(path)) return;
+
+                long before;
+                long after;
+
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    var content = ReadFully(fs);
+                    before = content.LongLength;
+                }
+
+                if (path.EndsWith(".html", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    MinifyHtml(path);
+                }
+                else if (path.EndsWith(".css", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    MinifyCSS(path);
+                }
+                else if (path.EndsWith(".js", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    MinifyJs(path);
+                }
+                else if (path.EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    MinifyImage(path);
+                }
+                else if (path.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    MinifyImage(path);
+                }
+                else if (path.EndsWith(".jpeg", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    MinifyImage(path);
+                }
+                else if (path.EndsWith(".gif", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    MinifyImage(path);
+                }
+
+                var bytes = File.ReadAllBytes(path);
+                after = bytes.LongLength;
+
+                _logger.Write(new LogItem
+                {
+                    FileName = path,
+                    OriginalSizeBytes = before,
+                    NewSizeBytes = after
+                });
+
+                _fileHashStore.Save(path);
             }
-
-            if (_hash.ContainsKey(path))
+            catch (Exception ex)
             {
-                var hash = _hash[path];
-                var newhash = MD5.Create().ComputeHash(content);
-
-                if (hash.SequenceEqual(newhash)) return;
+                System.Diagnostics.Trace.WriteLine($"Minify:: Exception! {ex}");
             }
-
-            //todo handle images jpg gif
-            //todo figure out what to do with the date
-            if (path.EndsWith(".html", StringComparison.InvariantCultureIgnoreCase))
-            {
-                MinifyHtml(path);
-            }
-            else if (path.EndsWith(".css", StringComparison.InvariantCultureIgnoreCase))
-            {
-                MinifyCSS(path);
-            }
-            else if (path.EndsWith(".js", StringComparison.InvariantCultureIgnoreCase))
-            {
-                MinifyJs(path);
-            }
-            else if (path.EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
-            {
-                MinifyImage(path);
-            }
-            else if (path.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase))
-            {
-                MinifyImage(path);
-            }
-            else if (path.EndsWith(".jpeg", StringComparison.InvariantCultureIgnoreCase))
-            {
-                MinifyImage(path);
-            }
-            else if (path.EndsWith(".gif", StringComparison.InvariantCultureIgnoreCase))
-            {
-                MinifyImage(path);
-            }
-
-
-
-            var bytes = File.ReadAllBytes(path);
-            after = bytes.LongLength;
-
-
-            _logger.Write(new LogItem
-            {
-                FileName = path,
-                OriginalSizeBytes = before,
-                NewSizeBytes = after
-            });
-
-            var hashafter = MD5.Create().ComputeHash(bytes);
-
-            _hash[path] = hashafter;
         }
 
-        public void FullMinify()
+        public async void FullMinify()
         {
-            foreach (string filter in _extensions)
+            await SemaphoreSlim.WaitAsync();
+            try
             {
-                foreach (string file in Directory.EnumerateFiles(_path, string.Concat("*", filter), SearchOption.AllDirectories))
+                foreach (string filter in _extensions)
                 {
-                    try
+                    foreach (string file in Directory.EnumerateFiles(_path, string.Concat("*", filter), SearchOption.AllDirectories))
                     {
                         Minify(file, DateTime.MinValue);
                     }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Trace.WriteLine($"Exception: {ex}");
-                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"FullMinify:: Exception! {ex}");
+            }
+            finally
+            {
+                SemaphoreSlim.Release();
             }
         }
 
     }
 }
 
-    

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureExtension.FullMinify.Log;
 using AzureExtension.FullMinify.Minify;
-using AzureJobs.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -86,14 +86,14 @@ namespace AzureExtension.FullMinify
                 }
                 else
                 {
-                    logfolder = @"D:\home\site\wwwroot\";
+                    logfolder = @"D:\home\site\wwwroot\appdata\Azure.FullMinify";
                 }
 
                 System.Diagnostics.Trace.WriteLine($"minify.path: {path}");
                 System.Diagnostics.Trace.WriteLine($"minify.extensions: {extensions}");
                 System.Diagnostics.Trace.WriteLine($"minify.logpath: {logfolder}");
-                Logger logger = new Logger(logfolder);
-                Minifier minifier = new Minifier(extensions, path, logger);
+   
+                Minifier minifier = new Minifier(extensions, path, logfolder);
                 Task.Run(() => minifier.FullMinify()).ContinueWith(minifier.Watch);
             }
             catch (Exception ex)

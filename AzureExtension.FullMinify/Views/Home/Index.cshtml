@@ -9,9 +9,19 @@
 <div>
     <h2>AzureExtension.FullMinify</h2>
 
-    <div>Files: @Model.Count</div>
-    <div>Savings: @Helper.ReturnSize(Model.Select(x => x.Saving).Sum(), string.Empty)</div>
-
+    <div>Total Files: @Model.Count</div>
+    
+    @{
+        var savingsTotal = (1-((double)Model.Sum(x => x.Optimized) / (double)Model.Sum(x => x.Original))) * 100;
+        var avgSaving = Model.Average(x => x.Saving);
+    }
+    
+    <div>Total Reduction: @Helper.ReturnSize(Model.Select(x => x.Saving).Sum(), string.Empty)   (@string.Format("{0:0.00}",savingsTotal)%) </div>
+    <div>AVG Saving: @Helper.ReturnSize(avgSaving, string.Empty)</div>
+    
+    <p style="margin:15px 0">
+        The following list contains all the assets that have been minified:
+    </p>
     <table class="table table-bordered table-condensed table-hover">
         <thead>
             <tr>
@@ -23,13 +33,13 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var result in Model)
+            @foreach (var result in Model.OrderByDescending(x => x.Date))
             {
                 <tr>
                     <td>@result.FileName</td>
-                    <td>@result.Original</td>
-                    <td>@result.Optimized</td>
-                    <td>@result.Saving</td>
+                    <td>@Helper.ReturnSize(result.Original, string.Empty)</td>
+                    <td>@Helper.ReturnSize(result.Optimized, string.Empty)</td>
+                    <td>@Helper.ReturnSize(result.Saving, string.Empty) (@string.Format("{0:0.00}%", result.Percent))</td>
                     <td>@result.Date</td>
                 </tr>
             }

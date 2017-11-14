@@ -3,9 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using AzureExtension.FullMinify.CSV;
-using AzureExtension.FullMinify.Log;
 
-namespace AzureJobs.Common
+namespace AzureExtension.FullMinify.Log
 {
     /// <summary>
     /// Taken from: https://github.com/ligershark/AzureJobs

@@ -8,7 +8,6 @@ using System.Web;
 using AzureExtension.FullMinify.Minify;
 using Microsoft.AspNetCore.Mvc;
 using AzureExtension.FullMinify.Models;
-using AzureJobs.Common;
 using Microsoft.Extensions.Configuration;
 
 namespace AzureExtension.FullMinify.Controllers
@@ -63,11 +62,12 @@ namespace AzureExtension.FullMinify.Controllers
             return View(results);
         }
 
-        public IActionResult Log()
+        public IActionResult Debug()
         {
             var logs = new List<string>();
-
-            string logfolder;
+            try
+            {
+                string logfolder;
             if (!string.IsNullOrEmpty(_configuration["minify.logpath"]))
             {
                 logfolder = _configuration["minify.logpath"];
@@ -97,10 +97,9 @@ namespace AzureExtension.FullMinify.Controllers
                 path = path = @"D:\home\site\wwwroot\";
             }
 
-            try
-            {
-                Logger logger = new Logger(logfolder);
-                Minifier minifier = new Minifier(extensions, path, logger);
+            
+                
+                Minifier minifier = new Minifier(extensions, path, logfolder);
                 Task.Run(() => minifier.FullMinify());
             }
             catch (Exception ex)
@@ -144,13 +143,6 @@ namespace AzureExtension.FullMinify.Controllers
         public IActionResult About()
         {
             ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
 
             return View();
         }
