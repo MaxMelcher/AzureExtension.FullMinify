@@ -23,11 +23,11 @@ namespace AzureExtension.FullMinify
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-               
+               .CaptureStartupErrors(true)
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     var env = hostingContext.HostingEnvironment;
-           
+
                     config.AddEnvironmentVariables()
                         .SetBasePath(Directory.GetCurrentDirectory())
                         .AddJsonFile("appsettings.json")
@@ -35,6 +35,7 @@ namespace AzureExtension.FullMinify
 
                     configuration = config.Build();
                 })
+                
                 .UseStartup<Startup>()
                 .Build();
     }
