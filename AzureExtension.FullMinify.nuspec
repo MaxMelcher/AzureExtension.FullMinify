@@ -3,7 +3,7 @@
   <metadata>
     <id>AzureExtension.FullMinify</id>
     <title>Azure Extension FullMinify</title>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
     <authors>maxmelcher</authors>
     <licenseUrl>https://github.com/MaxMelcher/AzureExtension.FullMinify/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/MaxMelcher/AzureExtension.FullMinify</projectUrl>

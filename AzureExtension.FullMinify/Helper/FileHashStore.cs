@@ -31,6 +31,8 @@ namespace AzureExtension.FullMinify.Helper
             Load();
         }
 
+        public int Count => _store.Count;
+
         private void Load()
         {
             try

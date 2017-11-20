@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -6,8 +7,6 @@ using System.Threading.Tasks;
 using AzureExtension.FullMinify.Log;
 using DouglasCrockford.JsMin;
 using ZetaProducerHtmlCompressor;
-using System.Security.Cryptography;
-using System.Linq;
 using System.Threading;
 using AzureExtension.FullMinify.Helper;
 
@@ -19,16 +18,25 @@ namespace AzureExtension.FullMinify.Minify
         private readonly List<string> _extensions;
         private readonly string _path;
         private readonly Logger _logger;
+        public static BlockingCollection<string> Queue = new BlockingCollection<string>(new ConcurrentStack<string>());
 
-        //todo persis the hash to disk otherwise the job will be started once a day
-        private FileHashStore _fileHashStore;
+        public static FileHashStore FileHashStore;
 
         public Minifier(List<string> extensions, string path, string logfolder)
         {
             _extensions = extensions;
             _path = path;
             _logger = new Logger(logfolder);
-            _fileHashStore = new FileHashStore(logfolder);
+            FileHashStore = new FileHashStore(logfolder);
+
+            Task.Factory.StartNew(() =>
+            {
+                while (true)
+                {
+                    var filepath = Queue.Take();
+                    Minify(filepath);
+                }
+            });
         }
 
         public void MinifyCSS(string filepath)
@@ -101,8 +109,8 @@ namespace AzureExtension.FullMinify.Minify
                                    NotifyFilters.FileName,
                     InternalBufferSize = 64000
                 };
-                w.Changed += (s, e) => Minify(e.FullPath, DateTime.Now);
-                w.Renamed += (s, e) => Minify(e.FullPath, DateTime.Now);
+                w.Changed += (s, e) => AddToQueue(e.FullPath);
+                w.Renamed += (s, e) => AddToQueue(e.FullPath);
                 w.EnableRaisingEvents = true;
             }
         }
@@ -116,12 +124,20 @@ namespace AzureExtension.FullMinify.Minify
             }
         }
 
-        public void Minify(string path, DateTime date)
+        public static void AddToQueue(string filepath)
+        {
+            if (FileHashStore.HasChangedOrIsNew(filepath))
+            {
+                Queue.Add(filepath);
+            }
+        }
+
+        public void Minify(string path)
         {
             try
             {
                 //if not changed - do nothing
-                if (!_fileHashStore.HasChangedOrIsNew(path)) return;
+                if (!FileHashStore.HasChangedOrIsNew(path)) return;
 
                 long before;
                 long after;
@@ -171,7 +187,7 @@ namespace AzureExtension.FullMinify.Minify
                     NewSizeBytes = after
                 });
 
-                _fileHashStore.Save(path);
+                FileHashStore.Save(path);
             }
             catch (Exception ex)
             {
@@ -188,7 +204,7 @@ namespace AzureExtension.FullMinify.Minify
                 {
                     foreach (string file in Directory.EnumerateFiles(_path, string.Concat("*", filter), SearchOption.AllDirectories))
                     {
-                        Minify(file, DateTime.MinValue);
+                        AddToQueue(file);
                     }
                 }
             }

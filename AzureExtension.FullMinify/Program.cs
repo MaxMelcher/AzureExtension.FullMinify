@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-using AzureExtension.FullMinify.Minify;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +8,7 @@ namespace AzureExtension.FullMinify
 {
     public class Program
     {
-        private static IConfigurationRoot configuration;
+        private static IConfigurationRoot _configuration;
 
         public static void Main(string[] args)
         {
@@ -32,7 +29,7 @@ namespace AzureExtension.FullMinify
                         .AddJsonFile("appsettings.json")
                         .AddJsonFile($"appsettings.{env.EnvironmentName}.json");
 
-                    configuration = config.Build();
+                    _configuration = config.Build();
                 })
                 
                 .UseStartup<Startup>()

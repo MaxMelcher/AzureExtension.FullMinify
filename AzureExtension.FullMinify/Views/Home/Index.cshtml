@@ -1,6 +1,5 @@
-﻿@using System.IO
-@using AzureExtension.FullMinify.Controllers
-@using AzureExtension.FullMinify.Helper
+﻿@using AzureExtension.FullMinify.Helper
+@using AzureExtension.FullMinify.Minify
 @model List<AzureExtension.FullMinify.Controllers.Result>
 @{
     ViewData["Title"] = "Home Page";
@@ -9,7 +8,7 @@
 <div>
     <h2>AzureExtension.FullMinify</h2>
 
-    <div>Total Files: @Model.Count</div>
+    <div>Total Files: @Minifier.FileHashStore.Count</div>
     
     @{
         var savingsTotal = (1-((double)Model.Sum(x => x.Optimized) / (double)Model.Sum(x => x.Original))) * 100;
@@ -20,6 +19,9 @@
     <div>Total Reduction: @Helper.ReturnSize(Model.Select(x => x.Saving).Sum(), string.Empty)   (@string.Format("{0:0.00}",savingsTotal)%) </div>
     <div>AVG Saving: @Helper.ReturnSize(avgSaving, string.Empty)</div>
     <div>MAX Saving: @Helper.ReturnSize(maxSaving, string.Empty)</div>
+    <p>
+        <div>Items in the queue: @Minifier.Queue.Count</div>
+    </p>
     
     <p style="margin:15px 0">
         The following list contains all the assets that have been minified:
