@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureExtension.FullMinify.Helper;
 using AzureExtension.FullMinify.Log;
 using AzureExtension.FullMinify.Minify;
 using Microsoft.AspNetCore.Builder;
@@ -58,42 +59,12 @@ namespace AzureExtension.FullMinify
         {
             try
             {
-                var extensions = new List<string>();
-                string path;
-                
-                if (!string.IsNullOrEmpty(configuration["minify.extensions"]))
-                {
-                    extensions.AddRange(configuration["minify.extensions"].Split(";", StringSplitOptions.RemoveEmptyEntries));
-                }
-                else
-                {
-                    extensions.AddRange(new[] { ".css", ".html", ".js" });
-                }
+                string path = @"D:\home\site\wwwroot\appdata\Azure.FullMinify";
 
-                if (!string.IsNullOrEmpty(configuration["minify.path"]))
-                {
-                    path = configuration["minify.path"];
-                }
-                else
-                {
-                    path = @"D:\home\site\wwwroot\";
-                }
-
-                string logfolder;
-                if (!string.IsNullOrEmpty(configuration["minify.logpath"]))
-                {
-                    logfolder = configuration["minify.logpath"];
-                }
-                else
-                {
-                    logfolder = @"D:\home\site\wwwroot\appdata\Azure.FullMinify";
-                }
-
-                System.Diagnostics.Trace.WriteLine($"minify.path: {path}");
-                System.Diagnostics.Trace.WriteLine($"minify.extensions: {extensions}");
-                System.Diagnostics.Trace.WriteLine($"minify.logpath: {logfolder}");
+                ConfigReader configReader = new ConfigReader();
+                var config = configReader.Read(path);
    
-                Minifier minifier = new Minifier(extensions, path, logfolder);
+                Minifier minifier = new Minifier(config);
                 Task.Run(() => minifier.FullMinify()).ContinueWith(minifier.Watch);
             }
             catch (Exception ex)
